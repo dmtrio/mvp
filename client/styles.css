@@ -1,0 +1,31 @@
+* {
+  margin: 0px;
+}
+
+body {
+  background-color: #f0f0f0;
+}
+
+.newslinkdiv{
+  width: 600px;
+  height: 150px;
+  margin: 25px 0px;
+
+  background-color: white;
+  border: 1px solid grey;
+}
+
+.newslinkdiv img{
+  width: 200px;
+  float: left;
+  /*height: 150px*/
+}
+
+.newslinkdiv div{
+  float: left;
+  width: 400px
+}
+
+.newslinkdiv h3 {
+
+}

@@ -6,7 +6,10 @@ var bodyParser = require('body-parser');
 var path = require('path');
 var request = require('request');
 
-var apiKey = require('./app/apiKeys.js')
+var passport = require('passport');
+var FacebookStrategy = require('passport-facebook');
+
+var keys = require('./app/keys.js')
 var db = require('./app/config.js');
 var Models = require('./app/models/models')
 
@@ -17,26 +20,80 @@ app.use(bodyParser.json());
 
 app.use(morgan('dev'));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.get('/bundle.js', browserify('./client/index.js', {
   transform: [[require('babelify'), {presets: ['es2015', 'react']}]]
 }));
 
 app.use(express.static(path.join(__dirname, '/client')));
 
+app.get('/stlyes.css', function(req, res){
+  res.sendFile(path.join(__dirname, 'styles.css'));
+});
 // app.use('/styles.css', function(req, res, next) {
 //   res.sendFile(path.join(__dirname, 'styles.css'));
 // })
+
+var FACEBOOK_APP_ID = keys.FACEBOOK_APP_ID;
+var FACEBOOK_APP_SECRET = keys.FACEBOOK_APP_SECRET;
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+passport.use(new FacebookStrategy({
+    clientID: FACEBOOK_APP_ID,
+    clientSecret: FACEBOOK_APP_SECRET,
+    callbackURL: "http://localhost:4040/auth/facebook/callback"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    // var username = req.body.username;
+    //   var newUser = new Models.User({
+    //     username: username
+    //   })
+    //   newUser.save(function(err, newUser) {
+    //     if(err) {
+    //       res.status(500).send(err);
+    //     } else {
+    //       res.status(202).send(newUser);
+    //     }
+    //   })
+    Models.User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
+
+app.get('/auth/facebook',
+  passport.authenticate('facebook'));
+
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  function(req, res) {
+    console.log('hereeeeeeeeeeeeeeeeeeeeeeeee', req);
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
+
 
 //moster function to save a link of articles to database
 
 app.get('/news', function(req, res){
   var source = req.body.source;
-  request(`https://newsapi.org/v1/articles?source=the-washington-post&sortBy=top&apiKey=${apiKey.newsAPI}`, function (error, response, body) {
+  request(`https://newsapi.org/v1/articles?source=the-washington-post&sortBy=top&apiKey=${keys.newsAPI}`, function (error, response, body) {
     var body = JSON.parse(body);
+    var send = []
 
     function addLinks(article, articles, send){
       if(!article) {
         console.log(article, 'done');
+        send = JSON.stringify(send);
         res.send(send);
         return;
       }
@@ -50,16 +107,20 @@ app.get('/news', function(req, res){
               if(err) {
                 res.status(500).write(err);
               } else {
+                article._id = newLink._id;
+                send.push(article);
                 addLinks(articles.pop(), articles, send);
               }
             });
           } else {
             console.log('found');
+            article._id = link._id;
+            send.push(article);
             addLinks(articles.pop(), articles, send)
           }
         });
     }
-    addLinks(body.articles.pop(), body.articles.slice(), body.articles);
+    addLinks(body.articles.shift(), body.articles, send);
   });
 });
 
@@ -76,25 +137,20 @@ app.get('/dbusers', function(req, res){
   })
 });
 
-app.post('/user', function(req, res){
-  var username = req.body.username;
-  var newUser = new Models.User({
-    username: username
-  })
-  newUser.save(function(err, newUser) {
-    if(err) {
-      res.status(500).send(err);
-    } else {
-      res.status(202).send(newUser);
-    }
-  })
-})
-
-// app.get('/users', function(req, res){
-//   User.findAll().then(users => {
-//     res.send(users);
+// app.post('/user', function(req, res){
+//   var username = req.body.username;
+//   var newUser = new Models.User({
+//     username: username
 //   })
-// });
+//   newUser.save(function(err, newUser) {
+//     if(err) {
+//       res.status(500).send(err);
+//     } else {
+//       res.status(202).send(newUser);
+//     }
+//   })
+// })
+
 
 app.use(function(req, res, next) {
   res.status(404).send('404 - Page Not Found');

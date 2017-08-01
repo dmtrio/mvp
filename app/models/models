@@ -1,10 +1,13 @@
-var mongoose = require('mongoose');
-var timestamps = require('mongoose-timestamps');
-var autoIncrement = require('mongoose-auto-increment');
+const mongoose = require('mongoose');
+const timestamps = require('mongoose-timestamps');
+const autoIncrement = require('mongoose-auto-increment');
+const findOrCreate = require('mongoose-find-or-create')
 
 var userSchema = mongoose.Schema({
   username: {type: String, index: {unique: true}},
+  facebookId : {type: String, index: {unique: true}},
 });
+userSchema.plugin(findOrCreate)
 
 var User = mongoose.model('User', userSchema);
 
