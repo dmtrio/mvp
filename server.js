@@ -3,6 +3,7 @@ var morgan = require('morgan'); //logs requests
 var browserify = require('browserify-middleware');
 var babelify = require('babelify');
 var bodyParser = require('body-parser');
+var urlParser = require('url-parse')
 var path = require('path');
 var request = require('request');
 
@@ -36,10 +37,22 @@ app.get('/stlyes.css', function(req, res){
 //   res.sendFile(path.join(__dirname, 'styles.css'));
 // })
 
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  else {
+    res.redirect('/auth/facebook')
+  }
+    // Return error content: res.jsonp(...) or redirect: res.redirect('/login')
+};
+
+
 var FACEBOOK_APP_ID = keys.FACEBOOK_APP_ID;
 var FACEBOOK_APP_SECRET = keys.FACEBOOK_APP_SECRET;
 
 passport.serializeUser(function(user, done) {
+  console.log('serial user', user);
   done(null, user);
 });
 
@@ -53,18 +66,8 @@ passport.use(new FacebookStrategy({
     callbackURL: "http://localhost:4040/auth/facebook/callback"
   },
   function(accessToken, refreshToken, profile, cb) {
-    // var username = req.body.username;
-    //   var newUser = new Models.User({
-    //     username: username
-    //   })
-    //   newUser.save(function(err, newUser) {
-    //     if(err) {
-    //       res.status(500).send(err);
-    //     } else {
-    //       res.status(202).send(newUser);
-    //     }
-    //   })
     Models.User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+      console.log('callllllllllback', cb);
       return cb(err, user);
     });
   }
@@ -76,7 +79,6 @@ app.get('/auth/facebook',
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
-    console.log('hereeeeeeeeeeeeeeeeeeeeeeeee', req);
     // Successful authentication, redirect home.
     res.redirect('/');
   });
@@ -136,6 +138,47 @@ app.get('/dbusers', function(req, res){
     res.status(202).send(users);
   })
 });
+
+app.post('/reactions', function(req, res){
+  var userId = req.body.userId;
+  var urlId = req.body.urlId;
+  var reaction = req.body.reaction;
+  console.log('here', req.body);
+
+  Models.Link.findOne({_id: urlId}).then(link => {
+    var updateReaction = link[reaction]
+    var index = updateReaction.indexOf(userId);
+    if (index === -1) {
+      updateReaction.push(userId);
+    } else {
+      updateReaction.splice(index, 1);
+    }
+    link.save()
+  });
+
+  Models.User.findOne({_id: userId}).then(user => {
+    var updateReaction = user[reaction]
+    var index = updateReaction.indexOf(urlId);
+    if (index === -1) {
+      updateReaction.push(urlId);
+    } else {
+      updateReaction.splice(index, 1);
+    }
+    user.save()
+    res.send();
+  });
+});
+
+app.get('/reactions', function(req, res) {
+    var parsedUrl = urlParser(req.url).query.slice(1);
+    Models.Link.findOne({_id: parsedUrl})
+    .catch (err => {
+      console.log(err);
+    })
+    .then(link => {
+      res.send(link);
+    })
+})
 
 // app.post('/user', function(req, res){
 //   var username = req.body.username;

@@ -1,14 +1,52 @@
 import React from 'react';
 
-import * as NewsModel from '../models/news.js';
+import ReactionButton from './ReactionButton.jsx';
+import * as Reactions from '../models/reactions.js';
 
 
 class NewsLink extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      like: false,
+      likeCount: '',
+      happy: false,
+      happyCount: '',
+    }
+
+    this.addReaction = this.addReaction.bind(this);
 
   }
+
+  //handle loading current reactions count
+  componentDidMount() {
+    var id = this.props.id
+    Reactions.reactionsCount(id, (article) => {
+      this.setState({
+        likeCount: article.likes.length,
+        happyCount: article.happy.length
+      });
+    })
+  }
+
+
+  //handle clicking on reactions button
+  addReaction(e, reaction) {
+    console.log(reaction);
+    var id = this.props.id
+    var obj = {
+      userId: "5980dcb6a0d8425414e8d199",
+      urlId: id,
+      reaction: reaction
+    }
+    Reactions.reactions(obj, () => {
+      console.log('success');
+    });
+  }
+
+
+
 
   render() {
     var art = this.props.article
@@ -19,20 +57,13 @@ class NewsLink extends React.Component {
           <h4>{art.publishedAt}</h4>
           <p>{art.description}</p>
         </div>
+        <ReactionButton name={'likes'} count={this.state.likeCount} addReaction={this.addReaction}/>
+        <ReactionButton name={'happy'} count={this.state.happyCount} addReaction={this.addReaction}/>
+        {/* <ReactionButton name={'frown'} /> */}
         <img src={art.urlToImage} />
-
       </div>
-//
-//       "author": "Ashley Parker, Carol D. Leonnig, Philip Rucker, Tom Hamburger, Ashley Parker, Carol D. Leonnig, Philip Rucker, Tom Hamburger",
-// "title": "Trump dictated son’s misleading statement on meeting with Russian lawyer",
-// "description": "Some advisers are worried that the president’s direct involvement leaves him needlessly vulnerable to allegations of a coverup.",
-// "url": "https://www.washingtonpost.com/politics/trump-dictated-sons-misleading-statement-on-meeting-with-russian-lawyer/2017/07/31/04c94f96-73ae-11e7-8f39-eeb7d3a2d304_story.html",
-// "urlToImage": "https://img.washingtonpost.com/rf/image_1484w/2010-2019/WashingtonPost/2017/07/31/National-Politics/Images/Botsford170111Trump10200-crop2.JPG?t=20170517",
-// "publishedAt": "2017-07-31T12:46:00Z"
     )
-
   }
-
 }
 
 export default NewsLink;

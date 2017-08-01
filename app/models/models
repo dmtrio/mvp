@@ -6,6 +6,8 @@ const findOrCreate = require('mongoose-find-or-create')
 var userSchema = mongoose.Schema({
   username: {type: String, index: {unique: true}},
   facebookId : {type: String, index: {unique: true}},
+  likes: [],
+  happy: []
 });
 userSchema.plugin(findOrCreate)
 
@@ -13,6 +15,8 @@ var User = mongoose.model('User', userSchema);
 
 var linkSchema = mongoose.Schema({
   link: {type: String, index: {unique: true}},
+  likes: [],
+  happy: [],
 });
 
 var Link = mongoose.model('Link', linkSchema);

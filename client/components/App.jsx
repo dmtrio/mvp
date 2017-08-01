@@ -10,7 +10,6 @@ class App extends React.Component {
     this.state = {
       articles: [],
     }
-
   }
 
   componentDidMount() {
@@ -19,18 +18,19 @@ class App extends React.Component {
         articles: articles
       })
     })
-
   }
 
 
   render() {
     return (
       <div>
+        <header>
+          <a href="/auth/facebook">Log in with Facebook</a>
+        </header>
         <NewsView articles={this.state.articles} />
       </div>
       )
   }
-
 }
 
 export default App;
