@@ -1,0 +1,20 @@
+var mongoose = require('mongoose');
+var timestamps = require('mongoose-timestamps');
+var autoIncrement = require('mongoose-auto-increment');
+
+var userSchema = mongoose.Schema({
+  username: {type: String, index: {unique: true}},
+});
+
+var User = mongoose.model('User', userSchema);
+
+var linkSchema = mongoose.Schema({
+  link: {type: String, index: {unique: true}},
+});
+
+var Link = mongoose.model('Link', linkSchema);
+
+module.exports = {
+  User: User,
+  Link: Link
+};
