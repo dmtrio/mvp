@@ -8,7 +8,7 @@ body {
 
 .newslinkdiv{
   width: 600px;
-  height: 150px;
+  height: 200px;
   margin: 25px 0px;
   background-color: white;
   border: 1px solid grey;
@@ -23,9 +23,28 @@ body {
 .newslinkdiv div{
   float: left;
   width: 400px;
+  height: 200px;
   /* overflow: hidden; */
 }
 
 .newslinkdiv h3 {
 
 }
+
+.newslinkdivcontent {
+  height: 200px
+  /* overflow: hidden; */
+}
+
+.button img {
+  width: 25px;
+}
+
+div.button{
+  width: 70px;
+  height: 25px;
+  position: relative;
+  bottom: 30px;
+}
+
+/*div.w3-btn{border:none;display:inline-block;outline:0;padding:8px 16px;vertical-align:middle;overflow:hidden;text-decoration:none;color:inherit;background-color:inherit;text-align:center;cursor:pointer;white-space:nowrap}*/

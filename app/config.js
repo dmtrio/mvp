@@ -5,15 +5,9 @@ mongoose.Promise = require('bluebird');
 var Schema = mongoose.Schema;
 
 
-mongoose.connect('mongodb://localhost/newsAggregatorDB', { server: {reconnectTries: Number.MAX_VALUE} });
+mongoose.connect('mongodb://localhost/newsAggregatorDB2', { server: {reconnectTries: Number.MAX_VALUE} });
 var db = mongoose.connection;
 
-// var promise = mongoose.connect('mongodb://localhost/newsAggregatorDB', {
-//   useMongoClient: true,
-// })
-// promise.then(function(db) {
-//   console.log('MongoDB promise');
-//   connection.openUri('mongodb://localhost/newsAggregatorDB')
 
 
 

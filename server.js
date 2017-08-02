@@ -21,6 +21,8 @@ app.use(bodyParser.json());
 
 app.use(morgan('dev'));
 
+// app.use(session({ secret: 'anything' }));
+app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -67,11 +69,15 @@ passport.use(new FacebookStrategy({
   },
   function(accessToken, refreshToken, profile, cb) {
     Models.User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-      console.log('callllllllllback', cb);
+
       return cb(err, user);
     });
   }
 ));
+
+app.get('/usersession', (req, res) => {
+  res.send();
+})
 
 app.get('/auth/facebook',
   passport.authenticate('facebook'));
@@ -79,7 +85,6 @@ app.get('/auth/facebook',
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
-    // Successful authentication, redirect home.
     res.redirect('/');
   });
 
@@ -140,7 +145,11 @@ app.get('/dbusers', function(req, res){
 });
 
 app.post('/reactions', function(req, res){
-  var userId = req.body.userId;
+  console.log('re user', req.user);
+  console.log('re id', req.user._id);
+
+
+  var userId = req.user._id;
   var urlId = req.body.urlId;
   var reaction = req.body.reaction;
   console.log('here', req.body);
@@ -180,6 +189,8 @@ app.get('/reactions', function(req, res) {
     })
 })
 
+
+
 // app.post('/user', function(req, res){
 //   var username = req.body.username;
 //   var newUser = new Models.User({
@@ -194,6 +205,11 @@ app.get('/reactions', function(req, res) {
 //   })
 // })
 
+app.get('/logout', function (req, res){
+  req.session.destroy(function (err) {
+    res.redirect('/'); //Inside a callback… bulletproof!
+  });
+});
 
 app.use(function(req, res, next) {
   res.status(404).send('404 - Page Not Found');

@@ -7,7 +7,9 @@ var userSchema = mongoose.Schema({
   username: {type: String, index: {unique: true}},
   facebookId : {type: String, index: {unique: true}},
   likes: [],
-  happy: []
+  happy: [],
+  dino: [],
+  rick: []
 });
 userSchema.plugin(findOrCreate)
 
@@ -17,6 +19,8 @@ var linkSchema = mongoose.Schema({
   link: {type: String, index: {unique: true}},
   likes: [],
   happy: [],
+  dino: [],
+  rick: []
 });
 
 var Link = mongoose.model('Link', linkSchema);
